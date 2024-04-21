@@ -1,0 +1,27 @@
+Definição do Trabalho de Implementação
+
+-- O que eu quero fazer:
+  OU MODIFICAR ESSE CARA: 
+    https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
+  OU CRIAR DO ZERO:
+    Um sniffer que irá loggar cada pacote da rede
+    Irá ser feito em C
+    Utilizar as libs já disponibilizadas pelo linux, não utilizar a "libpcap"?
+    No log estarão as informações principais do pacote (quais?)
+      Talvez usar uma cor diferente para cada protocolo (https://stackoverflow.com/questions/3585846/color-text-in-terminal-applications-in-unix)
+    O programa poderá ser inicializado com uma flag que indica qual protocolo será observado
+      Ex: ./sniffer --all (tudo?)
+          ./sniffer --ipv4
+          ./sniffer --ipv6
+
+Pergunta: todos os pontos abaixo se aplicam para um software desenvolvido do zero?
+
+- Nome do software
+
+- Link da biblioteca onde o software é disponibilizado
+
+- Descrição do software: finalidade, funcionalidades, linguagem, ano de desenvolvimento, data da última atualização
+
+- Diagrama que mostre como o programa foi implementado
+
+- Descrição detalhada da funcionalidade a ser acrescida no software e o que deverá ser alterado no software
