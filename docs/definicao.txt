@@ -3,6 +3,8 @@ Definição do Trabalho de Implementação
 -- O que eu quero fazer:
   OU MODIFICAR ESSE CARA: 
     https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
+        - Opcoes de protocolos:
+            - SCTP - netinet/sctp.h
   OU CRIAR DO ZERO:
     Um sniffer que irá loggar cada pacote da rede
     Irá ser feito em C
