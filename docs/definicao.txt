@@ -1,22 +1,12 @@
 Definição do Trabalho de Implementação
 
--- O que eu quero fazer:
-  OU MODIFICAR ESSE CARA: 
-    https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
-        - Opcoes de protocolos:
-            - SCTP - netinet/sctp.h
-  OU CRIAR DO ZERO:
-    Um sniffer que irá loggar cada pacote da rede
-    Irá ser feito em C
-    Utilizar as libs já disponibilizadas pelo linux, não utilizar a "libpcap"?
-    No log estarão as informações principais do pacote (quais?)
-      Talvez usar uma cor diferente para cada protocolo (https://stackoverflow.com/questions/3585846/color-text-in-terminal-applications-in-unix)
-    O programa poderá ser inicializado com uma flag que indica qual protocolo será observado
-      Ex: ./sniffer --all (tudo?)
-          ./sniffer --ipv4
-          ./sniffer --ipv6
-
-Pergunta: todos os pontos abaixo se aplicam para um software desenvolvido do zero?
+-- O que será feito
+  https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
+    * Nova opcao de protocolo:
+      SCTP - netinet/sctp.h
+    * Opcao de printar na stdout ou no arquivo
+    * Printar network interfaces disponiveis (?)
+      https://www.cyberciti.biz/faq/linux-list-network-interfaces-names-command/
 
 - Nome do software
 
