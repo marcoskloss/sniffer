@@ -4,10 +4,9 @@ Definição do Trabalho de Implementação
   https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
     * Nova opcao de protocolo:
       SCTP - netinet/sctp.h
-      ARP - 
-          https://github.com/torvalds/linux/blob/master/include/uapi/linux/if_arp.h#L145C8-L145C15
-          OU
-          https://github.com/leostratus/netinet/blob/17bc2a77248344c8f686cfda95d491b78fc92c85/if_ether.h#L79
+      RTP???
+      -- focar em qual aplicações utilizam esses protocolos para ter ensumos para testar etc
+          - utilizar o wireshark
     * Opcao de printar na stdout ou no arquivo
     * Printar network interfaces disponiveis (?)
       https://www.cyberciti.biz/faq/linux-list-network-interfaces-names-command/
