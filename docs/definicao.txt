@@ -7,6 +7,10 @@ Definição do Trabalho de Implementação
       RTP???
       -- focar em qual aplicações utilizam esses protocolos para ter ensumos para testar etc
           - utilizar o wireshark
+      -- https://stackoverflow.com/questions/1171555/why-is-sctp-not-much-used-known#:~:text=SCTP%20is%20not%20very%20much%20known%20and%20not%20used/deployed%20a%20lot%20because%3A
+          - https://github.com/P1sec/pysctp
+          - https://manpages.ubuntu.com/manpages/noble/en/man1/withsctp.1.html
+
     * Opcao de printar na stdout ou no arquivo
     * Printar network interfaces disponiveis (?)
       https://www.cyberciti.biz/faq/linux-list-network-interfaces-names-command/
