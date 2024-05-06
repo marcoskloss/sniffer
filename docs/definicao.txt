@@ -11,6 +11,8 @@ Definição do Trabalho de Implementação
           - https://github.com/P1sec/pysctp
           - https://manpages.ubuntu.com/manpages/noble/en/man1/withsctp.1.html
 
+      -- Talvez usar o `pyscpt` e o `withsctp` para simular pacotes sctp;
+
     * Opcao de printar na stdout ou no arquivo
     * Printar network interfaces disponiveis (?)
       https://www.cyberciti.biz/faq/linux-list-network-interfaces-names-command/
