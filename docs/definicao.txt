@@ -1,5 +1,17 @@
 Definição do Trabalho de Implementação
 
+-- FINAL:
+
+Printar conteúdo de requisições HTTP
+  - tratar status code com uma cor diferenciada: 2xx verde, 3xx ou 4xx laranja, 5xx vermelho
+
+Oferecer ao executar o programa a possibilidade de filtrar por pacotes UDP, TCP... via args
+
+Toda requisição HTTP começa com o texto "HTTP1.1"
+
+Como testar uma requisição HTTP (sem ser HTTPS):
+  curl -v "http://nerverssl.com/"
+
 -- O que será feito
   https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
     * Nova opcao de protocolo:
@@ -15,6 +27,7 @@ Definição do Trabalho de Implementação
 
     * Opcao de printar na stdout ou no arquivo
     * Printar network interfaces disponiveis (?)
+      >> ip link show
       https://www.cyberciti.biz/faq/linux-list-network-interfaces-names-command/
 
 - Nome do software
