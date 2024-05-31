@@ -9,6 +9,8 @@ Oferecer ao executar o programa a possibilidade de filtrar por pacotes UDP, TCP.
 
 Toda requisição HTTP começa com o texto "HTTP1.1"
 
+Buildar com -Wall
+
 Como testar uma requisição HTTP (sem ser HTTPS):
   curl -v "http://nerverssl.com/"
 

@@ -13,6 +13,7 @@
 #include <netinet/tcp.h>	  //For TCP Header
 #include <netinet/udp.h>	  //For UDP Header
 #include <signal.h>
+#include <assert.h>
 
 #define FILTER_ALL  0
 #define FILTER_UDP  1
@@ -121,7 +122,6 @@ void icmp_packet(unsigned char* Buffer , int Size)
      
 	fprintf(logsniff , "   |-Code : %d\n",(unsigned int)(icmph->code));
 	fprintf(logsniff , "   |-Checksum : %d\n",ntohs(icmph->checksum));
-    
 }
 
 
@@ -137,6 +137,43 @@ void tcp_packet(unsigned char* Buffer, int Size)
 	     
 	int header_size =  sizeof(struct ethhdr) + iphdrlen + tcph->doff*4;
 
+	char* data = (Buffer + header_size);
+	int data_size = Size - header_size;
+
+	//const int HTTP_LEN = strlen("HTTP");
+	const int HTTP_LEN = 64;
+
+	// TODO logica nao tá funcionando :(
+	if (data_size >= HTTP_LEN) {
+		char* http_test_str = malloc(sizeof(char) * HTTP_LEN);
+		strncpy(http_test_str, data, HTTP_LEN);
+
+		const char* HTTP_1_1 = "HTTP/1.1";
+		int HTTP_1_1_LEN = strlen(HTTP_1_1);
+		
+		//strcontains(http_test_str, HTTP_1_1);
+		int char_match_count = 0;
+		for (int i = 0; http_test_str[i] != '\0'; i++) {
+			assert(i < HTTP_LEN);
+			char* start = http_test_str + i;	
+
+			if (i + HTTP_1_1_LEN >= strlen(http_test_str))
+				break;
+
+			for (int j = 0; j < HTTP_1_1_LEN; j++) {
+				if (start[j] == HTTP_1_1[j]) {
+					char_match_count++;
+				}
+			}	
+		}
+
+		int http_match = char_match_count == HTTP_1_1_LEN;
+		if (http_match) {
+			printf("%s\n", http_test_str);
+		}
+		free(http_test_str);
+	}
+	
 	fprintf(logsniff , "\n\n***********************TCP Packet*************************\n");  
 	 
 	ip_header(Buffer,Size);
@@ -200,7 +237,8 @@ void packetCounter(unsigned char* buffer, int size, int filter)
 	if (proto == 1)
 	{
 		++icmp;
-		if (filter == FILTER_ICMP) icmp_packet(buffer,size);
+		if (filter == FILTER_ICMP || filter == FILTER_ALL) 
+            icmp_packet(buffer,size);
 	}
 	else if (proto == 2)
 	{
@@ -209,12 +247,14 @@ void packetCounter(unsigned char* buffer, int size, int filter)
 	else if(proto == 6)
 	{
 		++tcp;
-		if (filter == FILTER_TCP) tcp_packet(buffer,size);
+		if (filter == FILTER_TCP || filter == FILTER_ALL) 
+            tcp_packet(buffer,size);
 	}
 	else if(proto == 17)
 	{
 		++udp;
-		if (filter == FILTER_UDP) udp_packet(buffer,size);
+		if (filter == FILTER_UDP || filter == FILTER_ALL) 
+            udp_packet(buffer,size);
 	}
 	else
 	{
