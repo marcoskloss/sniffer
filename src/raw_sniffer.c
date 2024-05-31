@@ -124,6 +124,15 @@ void icmp_packet(unsigned char* Buffer , int Size)
 	fprintf(logsniff , "   |-Checksum : %d\n",ntohs(icmph->checksum));
 }
 
+void http_1_1(char* data, int size)
+{
+	// TODO not implemented
+	// print only the first line
+	// Ex.:
+	// {sending}   GET / HTTP/1.1
+	// {receiving} HTTP/1.1 200 OK
+	// we can print the status codes with colors
+}
 
 //Pass same sniffed RAW BUFFER into tcphdr structure and print TCP Header/Packet details.
 void tcp_packet(unsigned char* Buffer, int Size)
@@ -140,37 +149,21 @@ void tcp_packet(unsigned char* Buffer, int Size)
 	char* data = (Buffer + header_size);
 	int data_size = Size - header_size;
 
-	//const int HTTP_LEN = strlen("HTTP");
-	const int HTTP_LEN = 64;
+	const int HTTP_TEST_LEN = 32; // TODO can be a global
 
-	// TODO logica nao tá funcionando :(
-	if (data_size >= HTTP_LEN) {
-		char* http_test_str = malloc(sizeof(char) * HTTP_LEN);
+	if (data_size >= HTTP_TEST_LEN) {
+		char* http_test_str = malloc(sizeof(char) * HTTP_LEN); // TODO can be a global
 		strncpy(http_test_str, data, HTTP_LEN);
 
-		const char* HTTP_1_1 = "HTTP/1.1";
-		int HTTP_1_1_LEN = strlen(HTTP_1_1);
-		
-		//strcontains(http_test_str, HTTP_1_1);
-		int char_match_count = 0;
-		for (int i = 0; http_test_str[i] != '\0'; i++) {
-			assert(i < HTTP_LEN);
-			char* start = http_test_str + i;	
+		const char* HTTP_1_1 = "HTTP/1.1"; // TODO can be a global
+		int HTTP_1_1_LEN = strlen(HTTP_1_1); // TODO can be global
+	
+		char* http_match = strstr(http_test_str, HTTP_1_1);
 
-			if (i + HTTP_1_1_LEN >= strlen(http_test_str))
-				break;
-
-			for (int j = 0; j < HTTP_1_1_LEN; j++) {
-				if (start[j] == HTTP_1_1[j]) {
-					char_match_count++;
-				}
-			}	
+		if (http_match != NULL) {
+			http_1_1(data, data_size);
 		}
 
-		int http_match = char_match_count == HTTP_1_1_LEN;
-		if (http_match) {
-			printf("%s\n", http_test_str);
-		}
 		free(http_test_str);
 	}
 	
