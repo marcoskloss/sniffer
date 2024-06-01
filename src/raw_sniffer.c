@@ -20,6 +20,9 @@
 #define FILTER_TCP  2
 #define FILTER_ICMP 3
 
+#define HTTP_TEST_LEN 32
+#define HTTP_1_1 "HTTP/1.1"
+#define HTTP_1_1_LEN 8
 
 //global variables to track number of TCP/UDP/ICMP/IGMP/Others
 int tcp=0,icmp=0,igmp,udp=0,others=0,total=0;
@@ -126,12 +129,25 @@ void icmp_packet(unsigned char* Buffer , int Size)
 
 void http_1_1(char* data, int size)
 {
-	// TODO not implemented
-	// print only the first line
-	// Ex.:
-	// {sending}   GET / HTTP/1.1
-	// {receiving} HTTP/1.1 200 OK
-	// we can print the status codes with colors
+	int line_size = 0;
+	for (int i = 0; data[i] != '\n'; i++) {
+		line_size++;
+	}
+
+	char* line = malloc(sizeof(char) * line_size);
+	strncpy(line, data, line_size);
+
+	int is_receiving = strncmp(HTTP_1_1, data, HTTP_1_1_LEN) == 0;
+	if (is_receiving) {
+		printf("{receiving} ");
+		printf("%s\n", line);
+		//TODO we can print the status codes with colors
+		// {receiving} HTTP/1.1 429 Too Many Requests
+	} else {
+		printf("{sending} %s\n");
+	}
+
+	free(line);
 }
 
 //Pass same sniffed RAW BUFFER into tcphdr structure and print TCP Header/Packet details.
@@ -149,15 +165,10 @@ void tcp_packet(unsigned char* Buffer, int Size)
 	char* data = (Buffer + header_size);
 	int data_size = Size - header_size;
 
-	const int HTTP_TEST_LEN = 32; // TODO can be a global
-
 	if (data_size >= HTTP_TEST_LEN) {
-		char* http_test_str = malloc(sizeof(char) * HTTP_LEN); // TODO can be a global
-		strncpy(http_test_str, data, HTTP_LEN);
+		char* http_test_str = malloc(sizeof(char) * HTTP_TEST_LEN);
+		strncpy(http_test_str, data, HTTP_TEST_LEN);
 
-		const char* HTTP_1_1 = "HTTP/1.1"; // TODO can be a global
-		int HTTP_1_1_LEN = strlen(HTTP_1_1); // TODO can be global
-	
 		char* http_match = strstr(http_test_str, HTTP_1_1);
 
 		if (http_match != NULL) {
@@ -190,8 +201,6 @@ void tcp_packet(unsigned char* Buffer, int Size)
 	fprintf(logsniff , "   |-Checksum       : %d\n",ntohs(tcph->check));
 	fprintf(logsniff , "   |-Urgent Pointer : %d\n",tcph->urg_ptr);
 	fprintf(logsniff , "\n");
-
-    // TODO checkar o buffer no debugger para tratar o caso dos pacotes HTTP1.1
 }
 
 
