@@ -1,0 +1,70 @@
+# SEQ
+	- numero do primiero byte no segmento de dados
+
+# ACK
+	- número do próximo byte esperado do outro lado
+	
+## Como funciona a transmissao:
+	Mandei um ACK X, então espero que o próximo pacote recebido tenha SEQ X.
+	Após receber um SEQ X eu posso receber outros SEQs
+		Ex.:
+			SEQ=0 ACK=0 ========>
+			-> (espero receber um SEQ=0) 
+			
+    *recebi o SEQ=0     <======== SEQ=0 ACK=1024
+			<- (espero receber um SEQ=1024)
+			
+			<======== SEQ=1024 ACK=1024
+			<- (espero receber um SEQ=1024)
+			
+			<======== SEQ=2048 ACK=1024
+			<- (espero receber um SEQ=1024)
+			
+			SEQ=1024 ACK=3072 ========>
+			-> (espero receber um SEQ=3072) 
+			
+## Checagem:
+
+	(eu receiver) Toda vez que recebo um pacote tenho que ver qual SEQ que eu espero receber do sender em questão.
+	
+## Estrutura de dados:
+	
+type Check_Table = Map<Receiver_Ip, Sender_Table>
+
+type Sender_Table = Map<Sender_Ip, Expected_Seq>
+
+type Receiver_Ip = string
+
+type Sender_Ip = string	
+
+type Expected_Seq = number | NULL
+
+/*
+check_table = {
+	"ip-receiver-1": {
+		"ip-server-x": 1024 // expected_seq
+	}
+}
+*/
+
+## Pseudo-codigo:
+
+a cada vez que A enviar um pacote P para B:
+	if exists CheckTable[A.Ip]:
+		ExpectedSeq = P.Ack
+		CheckTable[A.Ip][B.Ip] = ExpectedSeq
+	else:
+		CheckTable[A.Ip] = new Map()
+		CheckTable[A.Ip][B.Ip] = ExpectedSeq
+
+	
+a cada vez que A receber um pacote P de B:
+	Expected = CheckTable[A.Ip][B.Ip]
+	
+	if Expected == NULL:
+		return
+	
+	if Expected == P.Seq:
+		CheckTable[A.Ip][B.Ip] = NULL // recebemos o SEQ correto
+	else:
+		REPORT_WRONG_SEQ_RECEIVED(receiver=A, from=B, packet=P)
