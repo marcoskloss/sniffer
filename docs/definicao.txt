@@ -1,43 +1,63 @@
-Definição do Trabalho de Implementação
+====> SEQ: 0    ACK: 0
+<---- SEQ: 0    ACK: 1024
+====> SEQ: 1024 ACK: 2048
+<---- SEQ: 2048 ACK: 3072 (enviando 3 pacotes em sequencia)
+<---- SEQ: 3072 ACK: 3072
+<---- SEQ: 4096 ACK: 3072
+====> SEQ: 3072 ACK: 5120
 
--- FINAL:
+Estrutura de dados:
 
-Printar conteúdo de requisições HTTP
-  - tratar status code com uma cor diferenciada: 2xx verde, 3xx ou 4xx laranja, 5xx vermelho
+Ips são do tipo unsigned long.
+EXPECTED_SEQ pode ser NULL ou uint32_t.
 
-Oferecer ao executar o programa a possibilidade de filtrar por pacotes UDP, TCP... via args
+ip_table = {
+	ipA: {
+		ipB: EXPECTED_SEQ // o ACK que enviamos anteriormente
+		ipC: NULL, // qualquer SEQ é válido nesse caso
+	},
+	ipD: { ... }
+}
 
-Toda requisição HTTP começa com o texto "HTTP1.1"
+Pseudocódigo:
 
-Buildar com -Wall
+# Caso 1: o processo A envia um pacote P para um processo B
 
-Como testar uma requisição HTTP (sem ser HTTPS):
-  curl -v "http://nerverssl.com/"
+// Guardamos o ACK para comparar com o SEQ que receberemos posteriormente
 
--- O que será feito
-  https://github.com/bsdb0y/Raw-Packet-Sniffer-in-C/blob/master/raw_sock_in.c
-    * Nova opcao de protocolo:
-      SCTP - netinet/sctp.h
-      RTP???
-      -- focar em qual aplicações utilizam esses protocolos para ter ensumos para testar etc
-          - utilizar o wireshark
-      -- https://stackoverflow.com/questions/1171555/why-is-sctp-not-much-used-known#:~:text=SCTP%20is%20not%20very%20much%20known%20and%20not%20used/deployed%20a%20lot%20because%3A
-          - https://github.com/P1sec/pysctp
-          - https://manpages.ubuntu.com/manpages/noble/en/man1/withsctp.1.html
+tcp_handler() {
+	...
 
-      -- Talvez usar o `pyscpt` e o `withsctp` para simular pacotes sctp;
+	A = P.Source
+	B = P.Dest
+	
+	if not exists IpTable[A.Ip] {
+		IpTable[A.Ip] = new Map()
+	}
+		
+	IpTable[A.Ip][B.Ip] = P.Ack	
 
-    * Opcao de printar na stdout ou no arquivo
-    * Printar network interfaces disponiveis (?)
-      >> ip link show
-      https://www.cyberciti.biz/faq/linux-list-network-interfaces-names-command/
+	...
+}
 
-- Nome do software
+# Caso 2: o processo A recebe um pacote P de um processo B
 
-- Link da biblioteca onde o software é disponibilizado
-
-- Descrição do software: finalidade, funcionalidades, linguagem, ano de desenvolvimento, data da última atualização
-
-- Diagrama que mostre como o programa foi implementado
-
-- Descrição detalhada da funcionalidade a ser acrescida no software e o que deverá ser alterado no software
+tcp_handler() {
+	...
+	
+	A = P.Dest
+	B = P.Source
+	
+	if exists IpTable[A.Ip][B.Ip] {
+		ExpectedSeq = IpTable[A.Ip][B.Ip]
+		ReceivedSeq = P.Seq
+		
+		if ExpectedSeq != ReceivedSeq {
+			PacketError(P)
+		} else {
+			IpTable[A.Ip][B.Ip] = NULL
+		}
+	}
+				
+	...
+}

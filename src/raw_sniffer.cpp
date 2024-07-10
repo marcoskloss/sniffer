@@ -15,21 +15,31 @@
 #include <signal.h>
 #include <assert.h>
 
+#include <unordered_map>
+#include <optional>
+
 #define FILTER_ALL  0
 #define FILTER_UDP  1
 #define FILTER_TCP  2
 #define FILTER_ICMP 3
 
-#define HTTP_TEST_LEN 32
-#define HTTP_1_1 "HTTP/1.1"
-#define HTTP_1_1_LEN 8
+typedef unsigned long Ip;
+// em vez de usar um optional seria possível simplesmente remover a chave do map
+typedef std::optional<uint32_t> ExpectedSeq;
+
+typedef std::unordered_map<Ip, std::unordered_map<Ip, ExpectedSeq>> IpTable;
+
+// TODO remover
+int test = 0;
 
 //global variables to track number of TCP/UDP/ICMP/IGMP/Others
 int tcp=0,icmp=0,igmp,udp=0,others=0,total=0;
 struct sockaddr_in source,dest;
 FILE *logsniff; //redirecting output to a file to parse any packet or ip info using grep 
-//Pass RAW BUFFER into Ethhdr structure and print Ethernet header information.
 
+IpTable ipTable;
+
+//Pass RAW BUFFER into Ethhdr structure and print Ethernet header information.
 
 void  INThandler(int sig)
 {
@@ -127,27 +137,50 @@ void icmp_packet(unsigned char* Buffer , int Size)
 	fprintf(logsniff , "   |-Checksum : %d\n",ntohs(icmph->checksum));
 }
 
-void http_1_1(char* data, int size)
+void checkAckSeq(struct tcphdr *tcph, struct iphdr *iph)
 {
-	int line_size = 0;
-	for (int i = 0; data[i] != '\n'; i++) {
-		line_size++;
+	struct sockaddr_in sockSource, sockDest;
+
+	memset(&sockSource, 0, sizeof(sockSource));
+	sockSource.sin_addr.s_addr = iph->saddr;
+
+	memset(&sockDest, 0, sizeof(sockDest));
+	sockDest.sin_addr.s_addr = iph->daddr;
+	
+	Ip sourceIp = sockSource.sin_addr.s_addr;
+	Ip destIp = sockDest.sin_addr.s_addr;
+	bool packetError = false;
+	std::optional<uint32_t> expectedSeq;
+
+	// checando o SEQ do pacote
+	if (
+		ipTable.find(destIp) != ipTable.end() &&
+		ipTable[destIp].find(sourceIp) != ipTable[destIp].end()
+	) {
+		expectedSeq = ipTable[destIp][sourceIp];
+		auto receivedSeq = ntohl(tcph->seq);
+
+		if (expectedSeq.has_value() && expectedSeq.value() != receivedSeq) {
+			packetError = true;
+		} else {
+			ipTable[destIp][sourceIp] = std::nullopt;
+		}
 	}
 
-	char* line = malloc(sizeof(char) * line_size);
-	strncpy(line, data, line_size);
+	// armazenando o ACK para comparar com um futuro SEQ recebido
+	if (ipTable.find(sourceIp) == ipTable.end()) {
+		ipTable[sourceIp] = std::unordered_map<Ip, ExpectedSeq>();
+	}
+	ipTable[sourceIp][destIp] = ntohl(tcph->ack_seq);
 
-	int is_receiving = strncmp(HTTP_1_1, data, HTTP_1_1_LEN) == 0;
-	if (is_receiving) {
-		printf("{receiving} ");
-		printf("%s\n", line);
-		//TODO we can print the status codes with colors
-		// {receiving} HTTP/1.1 429 Too Many Requests
-	} else {
-		printf("{sending} %s\n");
+	if (packetError) {
+		printf("Pacote com erro\n");
 	}
 
-	free(line);
+	if (packetError) {
+		assert(expectedSeq.has_value());
+		fprintf(logsniff , "\nERROR: expected seq: %u, received seq: %u\n\n", expectedSeq.value(), ntohl(tcph->seq));
+	}
 }
 
 //Pass same sniffed RAW BUFFER into tcphdr structure and print TCP Header/Packet details.
@@ -162,25 +195,13 @@ void tcp_packet(unsigned char* Buffer, int Size)
 	     
 	int header_size =  sizeof(struct ethhdr) + iphdrlen + tcph->doff*4;
 
-	char* data = (Buffer + header_size);
-	int data_size = Size - header_size;
+	// TODO remover
+	test++;
 
-	if (data_size >= HTTP_TEST_LEN) {
-		char* http_test_str = malloc(sizeof(char) * HTTP_TEST_LEN);
-		strncpy(http_test_str, data, HTTP_TEST_LEN);
-
-		char* http_match = strstr(http_test_str, HTTP_1_1);
-
-		if (http_match != NULL) {
-			http_1_1(data, data_size);
-		}
-
-		free(http_test_str);
-	}
-	
-	fprintf(logsniff , "\n\n***********************TCP Packet*************************\n");  
-	 
+	fprintf(logsniff , "\n\n***********************TCP Packet*************************, counter=%d\n", test);  
 	ip_header(Buffer,Size);
+
+	checkAckSeq(tcph, iph);
 	 
 	fprintf(logsniff , "\n");
 	fprintf(logsniff , "TCP Header\n");
