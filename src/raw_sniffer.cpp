@@ -29,9 +29,6 @@ typedef std::optional<uint32_t> ExpectedSeq;
 
 typedef std::unordered_map<Ip, std::unordered_map<Ip, ExpectedSeq>> IpTable;
 
-// TODO remover
-int test = 0;
-
 //global variables to track number of TCP/UDP/ICMP/IGMP/Others
 int tcp=0,icmp=0,igmp,udp=0,others=0,total=0;
 struct sockaddr_in source,dest;
@@ -195,10 +192,7 @@ void tcp_packet(unsigned char* Buffer, int Size)
 	     
 	int header_size =  sizeof(struct ethhdr) + iphdrlen + tcph->doff*4;
 
-	// TODO remover
-	test++;
-
-	fprintf(logsniff , "\n\n***********************TCP Packet*************************, counter=%d\n", test);  
+	fprintf(logsniff , "\n\n***********************TCP Packet*************************\n");  
 	ip_header(Buffer,Size);
 
 	checkAckSeq(tcph, iph);
