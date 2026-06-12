@@ -25,7 +25,5 @@ The legacy C++ implementation is still available for reference under the `legacy
 ## Technologies
 
 - C#
-- .NET
-- Windows Forms
 - SharpPcap
 - PacketDotNet
